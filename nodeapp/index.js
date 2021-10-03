@@ -1,0 +1,38 @@
+const express = require("express");
+const app = express();
+const mysql = require("mysql2/promise");
+const randomName = require("random-name");
+const port = 3000;
+
+app.get("/", async (req, res) => {
+  const name = `${randomName.first()} ${randomName.last()}`;
+
+  const connection = await mysql.createConnection({
+    host: "db",
+    user: "root",
+    port: 3310,
+    password: "root",
+    database: "nodedb",
+  });
+
+  await connection.query(
+    `CREATE TABLE IF NOT EXISTS USERS (
+      id int NOT NULL AUTO_INCREMENT,
+      name VARCHAR(50),
+      PRIMARY KEY (id)
+    );`
+  );
+
+  await connection.query(`INSERT INTO USERS (NAME) VALUES('${name}');`);
+  const [data] = await connection.query(
+    `SELECT * FROM USERS WHERE NAME = '${name}';`
+  );
+  await connection.end();
+
+  res.send({
+    user: data[0],
+    message: `Hello, ${name}! Running on port ${port}!`,
+  });
+});
+
+app.listen(port, () => console.log(`running on port ${port}`));

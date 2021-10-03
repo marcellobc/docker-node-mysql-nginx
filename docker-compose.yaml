@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  nginx:
+    container_name: nginx
+    networks:
+      - node-challenge-net
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - nodeapp
+  nodeapp:
+    container_name: nodeapp
+    networks:
+      - node-challenge-net
+    build:
+      context: ./nodeapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: mysql:8
+    networks:
+      - node-challenge-net
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nodedb
+      MYSQL_TCP_PORT: 3310
+    ports:
+      - "3310:3310"
+    volumes:
+      - db-config:/etc/mysql
+      - db-data:/var/lib/mysql
+volumes:
+  db-config:
+  db-data:
+
+networks:
+  node-challenge-net:
