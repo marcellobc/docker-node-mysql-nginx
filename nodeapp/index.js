@@ -4,6 +4,8 @@ const mysql = require("mysql2/promise");
 const randomName = require("random-name");
 const port = 3000;
 
+app.set("view engine", "jade");
+
 app.get("/", async (req, res) => {
   const name = `${randomName.first()} ${randomName.last()}`;
 
@@ -24,15 +26,10 @@ app.get("/", async (req, res) => {
   );
 
   await connection.query(`INSERT INTO USERS (NAME) VALUES('${name}');`);
-  const [data] = await connection.query(
-    `SELECT * FROM USERS WHERE NAME = '${name}';`
-  );
+  const [data] = await connection.query(`SELECT * FROM USERS ORDER BY NAME;`);
   await connection.end();
 
-  res.send({
-    user: data[0],
-    message: `Hello, ${name}! Running on port ${port}!`,
-  });
+  res.render("index", { users: data });
 });
 
 app.listen(port, () => console.log(`running on port ${port}`));
